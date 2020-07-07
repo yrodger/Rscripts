@@ -34,7 +34,9 @@ glparegion <- gl.merge.pop(glparegion, old=c("Truganina", "St Albans"), new="Vic
 
 library(poppr)
 
-pral <- private_alleles(gi_private, form= alleles ~ . , report="table", count=TRUE) #The table format is more helpful
+pral <- private_alleles(gi_private, form= alleles ~ . , report="table", count=TRUE)
+#The table format is more helpful. This will give you a table with each locus that has private alleles as the top row and the next rows are how many private alleles in each
+#population/region you have chosen to compare.
 
 write.csv(pral, file = "private allele count regions.csv")
 #With this you can identify the loci that have private alleles and how many. This allows you to calculate the frequency of alleles in each population/region (I did this in Excel).
