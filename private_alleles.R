@@ -28,43 +28,13 @@ glparegion <- gl.merge.pop(gl12filtered6, old=c("Bredbo", "Michelago", "Captains
 glparegion <- gl.merge.pop(glparegion, old=c("Truganina", "St Albans"), new="Victoria")
 
 
+### Option 2: using poppr
 
-
-
+## Data format here is a genind object (adegenet)
 
 library(poppr)
 
-gi_private <- gl2gi(glparegion)
+pral <- private_alleles(gi_private, form= alleles ~ . , report="table", count=TRUE) #The table format is more helpful
 
-pral <- private_alleles(gi_private, form = alleles ~ ., report = "data.frame", level = "population", count.alleles = TRUE, drop = FALSE)
-
-write.csv(pral, file = "private allele count REGIONS.csv")
-
-Privates <- private_alleles(gi_private, form= alleles ~ . , report="table", count=TRUE)
-
-write.csv(Privates, file = "private allele Joe table.csv")
-
-###>20% allele threshold in both populations
-##Start with your imported dart data as genlight object. Calcualte the frequency of each allele at each locus:
-
-frequencies <- gl.alf(glparegion)
-
-##Create a column in this new object with the name of each locus
-frequencies$row.names <- glparegion$loc.names
-
-## Subset this frequency list, leaving only loci with with <0.2 frequency for either allele
-to_remove <- subset(frequencies, alf1 < 0.2 | alf2 <0.2)
-
-##Remove these < 0.2 frequency loci from your genlight object
-
-filtered_glparegion <- gl.drop.loc(glparegion, to_remove$row.names, v = 2)
-
-nLoc(filtered_glparegion) #390 loci
-
-paregion20 <- gl.report.pa.pop(filtered_glparegion)
-
-gipraregion20 <- gl2gi(filtered_glparegion)
-
-pa_filtered <- private_alleles(gipraregion20, form= alleles ~ . , report="table", count=TRUE)
-
-write.csv(pa_filtered, file = "private allele filetered 20 Joe table.csv")
+write.csv(pral, file = "private allele count regions.csv")
+#With this you can identify the loci that have private alleles and how many. This allows you to calculate the frequency of alleles in each population/region (I did this in Excel).
