@@ -1,0 +1,63 @@
+############################################
+### Progenitor analysis using silicoDArT ###
+############################################
+
+### Code written by Yael Rodger ###
+
+### SilicoDArT is a form of dominant marker produced alongside SNPs by Diversity Arrays Technology. Filtering of this dataset can be performed using the dartR package in R or by hand in Excel (as it comes as a csv file). The presence/absence data can be used to investigate the possible progenitors of species or populations of interest in your dataset. This is inspired by __Edet, O.U., Gorafi, Y.S.A., Nasuda, S. et al. DArTseq-based analysis of genomic relationships among species of tribe Triticeae. Sci Rep 8, 16397 (2018). https://doi.org/10.1038/s41598-018-34811-y__
+
+### The idea is that you will have a list of alleles unique to each of two populations/regions that you think might be the potential progenitors of your population/species of interest. Then you will create a list of alleles found in your population/species of interest. Next, you'll compare the proportions of unique alleles from each potential progenitor in your population/species of interest. The one with the higher proportion found will be the more likely progenitor.
+
+### In this analysis I utilise the **adegenet** and **poppr** packages in R. I used the dartR package to filter and then converted the final dataset to STRUCTURE format, as this yields the correct format to input into adegenet. You should have one extra column with population identifies, or region, or whatever hierarchy you are interested in.
+
+library(adegenet)
+library(poppr)
+
+df <- read.table("Tvd_SilicoDArT_structure_allpops.txt", header = T, row.names = 1) #read in silicoDArT STRUCTURE file as a table
+
+## Convert to genind object
+gisilicoregion <- df2genind(df[,!(colnames(df) == "pop" & colnames(df)== "region")], type = "PA", pop = df$region, ploidy = 1) #select every column except pop and region,
+                                                                                                                                  for P/A data, ploidy = 1
+gisilicoregion
+
+save(gisilicoregion, file = "gisilicoregion.rdata")
+
+nPop(gisilicoregion) #check how many pops are defined
+
+## Subsetting your populations/regions of interest
+obj <- seppop(gisilicoregion) #in this object, each region is a separate genind
+
+#Private alleles for VIC vs ACTNSW (where do tetraploids originate?)
+gi_tetorigin <- repool(obj$VICdiploids, obj$ACTNSW) #this creates a genind that only contains the two potential progenitors you want to test
+
+pralvicact <- private_alleles(gi_tetorigin, form = alleles ~ ., report = "table", level = "population", count.alleles = TRUE, drop = FALSE) #using the private_alleles function                                                                                                                                                   in poppr
+
+write.csv(as.data.frame(t(pralvicact)), file = "private_alleles_silico_VIC-ACT25082020.csv") #write a file with the private alleles between these two potential progenitors
+
+## Create a list of alleles found in your population/species of interest
+
+#Tetraploid only loci
+obj$Tetraploids
+tetdf <- genind2df(obj$Tetraploids)
+write.csv(t(tetdf), file = "Tetraploid_only_silico_loci.csv")
+
+##################
+
+### The rest of the analysis happens in Excel with your two csv files. Convert these to .xlsx as soon as possible by the way!
+
+## Create several columns of loci like the following (column of 1's is for easy LOOKUP functionality):
+
+A)                    B)  C)            D)
+TETRAPLOID ONLY LOCI 			VIC ONLY			ACTNSW ONLY
+X28644757            	1		X28626160			X100000003
+X28633262           	1		X28660046			X100000005
+X28621004            	1		X28647015			X100000006
+
+## Next, you'll use the LOOKUP function in Excel to count how many VIC or ACTNSW only loci are found in the tetraploid loci. Here is an example for just the VIC loci:
+                                    
+=IFERROR(VLOOKUP(C2,A$2:B$16334,2,FALSE),"") #If the VIC locus is present, this will return a 1 (from the 2nd column above). If not, it will return a blank space. Then you can                                                       COUNT() all the 1's to get your final tally.
+
+## Finally, just divide your tally by the total number of loci present in your population/species of interest (here: Tetraploids). Compare the proportions and find your more likely progenitor!
+
+
+
