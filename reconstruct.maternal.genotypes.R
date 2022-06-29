@@ -11,7 +11,7 @@ n <- 2035 #total number of loci
 colnames(df) <- c("id", paste0( rep(1:2035, each=2), "_", rep(1:2, times=n) )) #creating column names in the form locus1_allele1 and locus1_allele2, etc
 
 #the following code merges the genotypes across the individuals: if all homozygous, then resulting maternal genotype must be homozygous
-#if one is heterozygous at a locus, the mother must be heterozygous
+#if one of the individuals is heterozygous at a locus, the mother must be heterozygous
 result <- df %>% 
   pivot_longer(!id, names_to="name", values_to="code")%>%
   separate(name, c("locus","allele"), convert=TRUE) %>%
