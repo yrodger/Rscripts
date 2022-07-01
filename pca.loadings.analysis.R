@@ -28,7 +28,7 @@ loadings <- glBenmoref5$loc.names[which(abs(pcBenmore$loadings[,1])>threshold)]
 
 ## Check if these loci have private alleles in your populations, which may explain why they are contributin to so much differentiation in your PCA
 
-#Convert gl to genind 
+#Convert gl to genind and use poppr package
 gi.pc1loadings <- gl2gi(gl.loadings)
 
 load1pa <- private_alleles(gi.pc1loadings)
